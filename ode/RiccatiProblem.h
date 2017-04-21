@@ -18,7 +18,7 @@ class RiccatiProblem
       
       const int getDegreesOfFreedom() { return 1; }
       
-      void getRightHandSide( const double& t, const double* _u, double* fu )
+      void getRightHandSide( const double& t /* parametr */, const double* _u /* pole dlouhe pocet st. volnosti */, double* fu )
       {
          const double& u = _u[ 0 ];
          fu[ 0 ] = pow( t, -4.0 ) * exp( t ) + u + 2.0 * exp( -t ) * u * u;
@@ -32,9 +32,9 @@ class RiccatiProblem
       }
       
       bool writeExactSolution( const char*  fileName, 
-                               const double& initialTime,
-                               const double& finalTime,
-                               const double& timeStep,
+                               const double& initialTime, // a resiciho intervalu
+                               const double& finalTime, // b resiciho intervalu
+                               const double& timeStep, // ukladame si to pro vykresleni po casovem kroku
                                const double& c = 1.0 )
       {
          std::fstream file;

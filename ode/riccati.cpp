@@ -13,12 +13,13 @@
 
 using namespace std;
 
-typedef RiccatiProblem Problem;
-typedef Euler< Problem > Integrator;
-const double initialTime( 0.12 );
-const double finalTime( 0.15 );
-const double timeStep( 1.0e-3 );
-const double integrationTimeStep( 1.0e-4 );
+typedef RiccatiProblem Problem; // musi dat pocet stupnu volnosti a funci F (vycislit pravou stranu)
+typedef Euler< Problem > Integrator; /* řešič */
+// interval ve kterem to chceme resit (a,b) =
+/* (a = */const double initialTime( 0.1 );/* , */
+const double finalTime( 0.2 );/* = b ) */
+const double timeStep( 1.0e-3 ); // v techto casovych krocich ukladam do souboru pro vykresleni
+const double integrationTimeStep( 1.0e-3 ); // v techto casovych krocich to resim ... presnost
 
 int main( int argc, char** argv )
 {
