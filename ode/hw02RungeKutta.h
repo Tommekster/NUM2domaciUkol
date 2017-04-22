@@ -8,6 +8,8 @@
 #ifndef RUNGEKUTTA_H
 #define	RUNGEKUTTA_H
 
+#include "IntegratorBase.h"
+
 template< typename Problem >
 class RungeKutta : public IntegratorBase
 {
