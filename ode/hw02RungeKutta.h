@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   hw02RungeKutta.h
  * Author: zikmuto2
  *
@@ -14,7 +14,7 @@ template< typename Problem >
 class RungeKutta : public IntegratorBase
 {
    public:
-      
+
       RungeKutta( Problem& problem )
       {
          this->k1 = new double[ problem.getDegreesOfFreedom() ];
@@ -34,8 +34,8 @@ class RungeKutta : public IntegratorBase
              * Compute k1
              */
             // k1 = f(t,u)
-            problem.getRightHandSide( this->time/* t */, u /* u */, k1 /* result */ ); 
-            
+            problem.getRightHandSide( this->time/* t */, u /* u */, k1 /* result */ );
+
             /****
              * Compute k2
              */
@@ -45,7 +45,7 @@ class RungeKutta : public IntegratorBase
 
             // k2 = f(t + tau/3, u+tau/3*k1)
             problem.getRightHandSide( this->time + tau /* t + tau */, aux, k2 );
-            
+
             /***
              * vysledek: \delta u = tau * ( p1*k1(tau) + p2*k2(tau) )
              * p1 = p2 = 1/2
@@ -62,24 +62,23 @@ class RungeKutta : public IntegratorBase
             //if( this->adaptivity )
             //   tau *= 0.8 * pow( this->adaptivity / eps, 0.2 );
             tau = std::min( tau, this->stopTime - this->time );
-            std::cout << "ITER: " << iteration << " \t tau = " << tau << " \t time= " << time << "         \r " << std::flush;
+            //std::cout << "ITER: " << iteration << " \t tau = " << tau << " \t time= " << time << "         \r " << std::flush;
          }
-         std::cout << std::endl;
+         //std::cout << std::endl;
          return true;
       }
-      
+
       ~RungeKutta()
       {
          delete[] k1;
          delete[] k2;
          delete[] aux;
       }
-      
+
    protected:
-      
+
       double *k1, *k2, *aux;
-      
+
 };
 
 #endif	/* RUNGEKUTTA_H */
-

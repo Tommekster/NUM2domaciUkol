@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   ODESolver.h
  * Author: oberhuber
  *
@@ -17,7 +17,7 @@ template< typename Problem,
 class ODESolver
 {
    public:
-      
+
       ODESolver( Problem& problem,
                  Integrator& integrator )
       : problem( problem ),
@@ -25,13 +25,13 @@ class ODESolver
       {
          this->u = new double[ problem.getDegreesOfFreedom() ];
       }
-      
+
       void setInitialCondition( const double* initialCondition )
       {
          for( int i = 0; i < problem.getDegreesOfFreedom(); i++ )
             u[ i ] = initialCondition[ i ];
       }
-      
+
       bool solve( ODESolution& solution,
                   const double& initialTime,
                   const double& finalTime,
@@ -40,17 +40,24 @@ class ODESolver
          const int timeStepsCount = std::ceil( std::max( 0.0, finalTime - initialTime ) / timeStep );
          solution.setup( problem.getDegreesOfFreedom(),
                          timeStepsCount );
+         // na pocatku se do reseni vlozi pocatecni podminka
          for( int dof = 0; dof < this->problem.getDegreesOfFreedom(); dof++ )
             solution.setElement( 0, dof, u[ dof ] );
-         double time( initialTime );         
+
+         // samotne reseni
+         double time( initialTime );
          for( int k = 1; k <= timeStepsCount; k++ )
          {
-            std::cout << "Solving time step " << k << " / " << timeStepsCount << " => " << 
+            std::cout << "Solving time step " << k << " / " << timeStepsCount << " => " <<
                ( double ) k / ( double ) timeStepsCount * 100.0 << "% " << std::endl;
+
+            // tady se resi samotny krok
             this->integrator.setTime( time );
             this->integrator.setStopTime( time + timeStep );
             if( ! this->integrator.solve( problem, u ) )
                return false;
+
+            // krok hezky po slozkach ulozime
             for( int dof = 0; dof < this->problem.getDegreesOfFreedom(); dof++ )
                solution.setElement( k, dof, u[ dof ] );
             time += timeStep;
@@ -58,16 +65,15 @@ class ODESolver
          std::cout << "Done." << std::endl;
          return true;
       }
-      
+
    protected:
-      
+
       Problem& problem;
-      
+
       Integrator& integrator;
-      
+
       double* u;
 };
 
 
 #endif	/* ODESOLVER_H */
-
