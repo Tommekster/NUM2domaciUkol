@@ -9,11 +9,11 @@
 #define	RUNGEKUTTA_H
 
 template< typename Problem >
-class RungeKutt : public IntegratorBase
+class RungeKutta : public IntegratorBase
 {
    public:
       
-      RungeKutt( Problem& problem )
+      RungeKutta( Problem& problem )
       {
          this->k1 = new double[ problem.getDegreesOfFreedom() ];
          this->k2 = new double[ problem.getDegreesOfFreedom() ];
@@ -37,12 +37,12 @@ class RungeKutt : public IntegratorBase
             /****
              * Compute k2
              */
-            // aux = u + tau/3*k1
+            // aux = u + tau*k1
             for( int i = 0; i < dofs; i++ )
-               aux[ i ] = u[ i ] + tau * ( 1.0 / 3.0 * k1[ i ] );
+               aux[ i ] = u[ i ] + tau * k1[ i ] ;
 
             // k2 = f(t + tau/3, u+tau/3*k1)
-            problem.getRightHandSide( this->time + 1.0 / 3.0 * tau, aux, k2 );
+            problem.getRightHandSide( this->time + tau /* t + tau */, aux, k2 );
             
             /***
              * vysledek: \delta u = tau * ( p1*k1(tau) + p2*k2(tau) )
@@ -66,7 +66,7 @@ class RungeKutt : public IntegratorBase
          return true;
       }
       
-      ~Merson()
+      ~RungeKutta()
       {
          delete[] k1;
          delete[] k2;
