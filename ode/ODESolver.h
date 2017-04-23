@@ -49,7 +49,7 @@ class ODESolver
          for( int k = 1; k <= timeStepsCount; k++ )
          {
             std::cout << "Solving time step " << k << " / " << timeStepsCount << " => " <<
-               ( double ) k / ( double ) timeStepsCount * 100.0 << "% " << std::endl;
+               ( double ) k / ( double ) timeStepsCount * 100.0 << "%       \r"; // << std::endl;
 
             // tady se resi samotny krok
             this->integrator.setTime( time );

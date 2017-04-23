@@ -24,7 +24,7 @@ typedef Merson< Problem > MersonIntegrator; /* řešič */
 /* (a = */const double initialTime( -9.0 );/* , */
 const double finalTime( -1.0 );/* = b ) */
 const double timeStep( 1.0e-3 ); // v techto casovych krocich ukladam do souboru pro vykresleni
-const double integrationTimeStep( 1.0e-3 ); // v techto casovych krocich to resim ... presnost;
+//const double integrationTimeStep( 1.0e-3 ); // v techto casovych krocich to resim ... presnost;
 const double constParam( 1.0 );
 
 // (a,b) = (-9.031,0.473)
@@ -85,10 +85,10 @@ void countEOLs(const double *error, double frac, double *eols){
 }
 
 template<typename Integrator>
-void method(Problem &problem, ODESolution &solution, const double &timeStep){
+void method(Problem &problem, ODESolution &solution, const double &integrationTimeStep){
   Integrator integrator(problem);
 
-  integrator.setIntegrationTimeStep( timeStep );
+  integrator.setIntegrationTimeStep( integrationTimeStep );
   ODESolver< Problem, Integrator > solver( problem, integrator );
 
   double initialCondition[ 1 ];
@@ -105,11 +105,11 @@ void saveErrors(const char *fileName, const double *error, int len, const char *
   else for(int i = 0; i < len; i++) file << labels[i] << error[i] << std::endl;
 }
 
-void solve(Problem &problem, ODESolution &solution, double *error, double timeStep, const char *prefix){
+void solve(Problem &problem, ODESolution &solution, double *error, double integrationTimeStep, const char *prefix){
   char buff[100];
-  //double error[3*3];
+  double timeStep = 1.0e-3;
   // Euler
-  method< EulerIntegrator >(problem, solution, timeStep);
+  method< EulerIntegrator >(problem, solution, integrationTimeStep);
   strcpy(buff,prefix);
   strcat(buff,"riccati-euler.txt");
   solution.write( buff, initialTime, timeStep );
@@ -118,7 +118,7 @@ void solve(Problem &problem, ODESolution &solution, double *error, double timeSt
   error[2] = errorInf(problem, solution, timeStep);
 
   // Runge-Kutta
-  method< RKIntegrator >(problem, solution, timeStep);
+  method< RKIntegrator >(problem, solution, integrationTimeStep);
   strcpy(buff,prefix);
   strcat(buff,"riccati-rungekutta.txt");
   solution.write( buff, initialTime, timeStep );
@@ -127,17 +127,13 @@ void solve(Problem &problem, ODESolution &solution, double *error, double timeSt
   error[5] = errorInf(problem, solution, timeStep);
 
   // Merson
-  method< MersonIntegrator >(problem, solution, timeStep);
+  method< MersonIntegrator >(problem, solution, integrationTimeStep);
   strcpy(buff,prefix);
   strcat(buff,"riccati-merson.txt");
   solution.write( buff, initialTime, timeStep );
   error[6] = error1l(problem, solution, timeStep);
   error[7] = error2l(problem, solution, timeStep);
   error[8] = errorInf(problem, solution, timeStep);
-
-  strcpy(buff,prefix);
-  strcat(buff,"riccati-exact.txt");
-  problem.writeExactSolution( buff, initialTime, finalTime, timeStep, constParam );
 
   strcpy(buff,prefix);
   strcat(buff,"riccati-errors.txt");
