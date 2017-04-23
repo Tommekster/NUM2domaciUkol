@@ -102,6 +102,10 @@ double errorInf(
   return norm;
 }
 
+double eol(double error1, double tau1, double error2, double tau2){
+  return std::log(error1/error2)/std::log(tau1/tau2);
+}
+
 template<typename Integrator>
 void method(Problem &problem, ODESolution &solution, const double &integrationTimeStep){
   Integrator integrator(problem);
@@ -116,15 +120,15 @@ void method(Problem &problem, ODESolution &solution, const double &integrationTi
   solver.solve( solution, initialTime, finalTime, timeStep );
 }
 
-void saveErrors(const char *fileName, const double *error){
+void saveErrors(const char *fileName, const double *error, int len){
   std::fstream file;
   file.open( fileName, std::ios::out );
-  for(int i = 0; i < 3; i++) file << error[i] << std::endl;
+  for(int i = 0; i < len; i++) file << error[i] << std::endl;
 }
 
-void solve(Problem &problem, ODESolution &solution, double timeStep, const char *prefix){
+void solve(Problem &problem, ODESolution &solution, double *error, double timeStep, const char *prefix){
   char buff[100];
-  double error[3*3];
+  //double error[3*3];
   // Euler
   method< EulerIntegrator >(problem, solution, timeStep);
   strcpy(buff,prefix);
@@ -138,7 +142,7 @@ void solve(Problem &problem, ODESolution &solution, double timeStep, const char 
   method< RKIntegrator >(problem, solution, timeStep);
   strcpy(buff,prefix);
   strcat(buff,"riccati-rungekutta.txt");
-  solution.write( "riccati-rungekutta.txt", initialTime, timeStep );
+  solution.write( buff, initialTime, timeStep );
   error[3] = error1l(problem, solution, timeStep);
   error[4] = error2l(problem, solution, timeStep);
   error[5] = errorInf(problem, solution, timeStep);
@@ -147,16 +151,18 @@ void solve(Problem &problem, ODESolution &solution, double timeStep, const char 
   method< MersonIntegrator >(problem, solution, timeStep);
   strcpy(buff,prefix);
   strcat(buff,"riccati-merson.txt");
-  solution.write( "riccati-merson.txt", initialTime, timeStep );
+  solution.write( buff, initialTime, timeStep );
   error[6] = error1l(problem, solution, timeStep);
   error[7] = error2l(problem, solution, timeStep);
   error[8] = errorInf(problem, solution, timeStep);
 
-  problem.writeExactSolution( "riccati-exact.txt", initialTime, finalTime, timeStep, constParam );
+  strcpy(buff,prefix);
+  strcat(buff,"riccati-exact.txt");
+  problem.writeExactSolution( buff, initialTime, finalTime, timeStep, constParam );
 
   strcpy(buff,prefix);
   strcat(buff,"riccati-errors.txt");
-  saveErrors(buff,error);
+  saveErrors(buff,error,9);
 }
 
 int main( int argc, char** argv )
@@ -164,12 +170,15 @@ int main( int argc, char** argv )
     Problem problem;
     ODESolution solution;
 
-    solve(problem, solution, 1.0e-3, "01");
-    solve(problem, solution, 1.0e-3/2.0, "02");
-    solve(problem, solution, 1.0e-3/4.0, "04");
-    solve(problem, solution, 1.0e-3/8.0, "08");
-    solve(problem, solution, 1.0e-3/16.0, "16");
-    solve(problem, solution, 1.0e-3/32.0, "32");
+    double error[9*6];
+    solve(problem, solution, &error[0], 1.0e-3, "01/");
+    solve(problem, solution, &error[9], 1.0e-3/2.0, "02/");
+    solve(problem, solution, &error[18], 1.0e-3/4.0, "04/");
+    solve(problem, solution, &error[27], 1.0e-3/8.0, "08/");
+    solve(problem, solution, &error[36], 1.0e-3/16.0, "16/");
+    solve(problem, solution, &error[45], 1.0e-3/32.0, "32/");
+
+    saveErrors("riccati-errors.txt",error,9*6);
 
     return EXIT_SUCCESS;
 }
