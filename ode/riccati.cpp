@@ -80,6 +80,10 @@ double eol(double error1, double tau1, double error2, double tau2){
   return std::log(error1/error2)/std::log(tau1/tau2);
 }
 
+void countEOLs(const double *error, double frac, double *eols){
+  for(int i = 0; i < 9; i++) eols[i] = eol(error[i],error[i+9],frac,1.0);
+}
+
 template<typename Integrator>
 void method(Problem &problem, ODESolution &solution, const double &timeStep){
   Integrator integrator(problem);
@@ -94,10 +98,11 @@ void method(Problem &problem, ODESolution &solution, const double &timeStep){
   solver.solve( solution, initialTime, finalTime, timeStep );
 }
 
-void saveErrors(const char *fileName, const double *error, int len){
+void saveErrors(const char *fileName, const double *error, int len, const char **labels = 0){
   std::fstream file;
   file.open( fileName, std::ios::out );
-  for(int i = 0; i < len; i++) file << error[i] << std::endl;
+  if(labels == 0) for(int i = 0; i < len; i++) file << error[i] << std::endl;
+  else for(int i = 0; i < len; i++) file << labels[i] << error[i] << std::endl;
 }
 
 void solve(Problem &problem, ODESolution &solution, double *error, double timeStep, const char *prefix){
@@ -144,18 +149,138 @@ int main( int argc, char** argv )
     Problem problem;
     ODESolution solution;
 
-    double error[9*6];
+    double error[3*3*6];
+    double eols[3*3*5];
     solve(problem, solution, &error[0], 1.0e-3, "01/");
     solve(problem, solution, &error[9], 1.0e-3/2.0, "02/");
+    countEOLs(&error[0],2.0,&eols[0]);
     solve(problem, solution, &error[18], 1.0e-3/4.0, "04/");
+    countEOLs(&error[9],2.0,&eols[9]);
     solve(problem, solution, &error[27], 1.0e-3/8.0, "08/");
+    countEOLs(&error[18],2.0,&eols[18]);
     solve(problem, solution, &error[36], 1.0e-3/16.0, "16/");
+    countEOLs(&error[27],2.0,&eols[27]);
     solve(problem, solution, &error[45], 1.0e-3/32.0, "32/");
+    countEOLs(&error[36],2.0,&eols[36]);
 
     //problem.writeExactSolution("riccati-exact.txt", initialTime, finalTime,
     //  1.0e-3/32.0, constParam);
 
-    saveErrors("riccati-errors.txt",error,9*6);
+    const char *labels[] = {
+      "timeStep: 1e-3\nEuler\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Runge-Kutta\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Merson\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+
+      "\ntimeStep: 1e-3/2\nEuler\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Runge-Kutta\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Merson\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+
+      "\ntimeStep: 1e-3/4\nEuler\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Runge-Kutta\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Merson\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+
+      "\ntimeStep: 1e-3/8\nEuler\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Runge-Kutta\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Merson\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+
+      "\ntimeStep: 1e-3/16\nEuler\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Runge-Kutta\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Merson\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+
+      "\ntimeStep: 1e-3/32\nEuler\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Runge-Kutta\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Merson\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+    };
+    saveErrors("riccati-errors.txt",error,3*3*6,labels);
+
+    const char *labels2[] = {
+      "timeStep: 1e-3 -> 1e-3/2\nEuler\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Runge-Kutta\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Merson\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+
+      "\ntimeStep: 1e-3/2 -> 1e-3/4\nEuler\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Runge-Kutta\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Merson\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+
+      "\ntimeStep: 1e-3/4 -> 1e-3/8\nEuler\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Runge-Kutta\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Merson\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+
+      "\ntimeStep: 1e-3/8 -> 1e-3/16\nEuler\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Runge-Kutta\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Merson\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+
+      "\ntimeStep: 1e-3/16 -> 1e-3/32\nEuler\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Runge-Kutta\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+      "Merson\nE_1l = ",
+      "E_2l = ",
+      "E_In = ",
+    };
+    saveErrors("riccati-eol.txt",error,3*3*5,labels2);
 
     return EXIT_SUCCESS;
 }
