@@ -280,7 +280,7 @@ int main( int argc, char** argv )
       "E_2l = ",
       "E_In = ",
     };
-    saveErrors("riccati-eol.txt",error,3*3*5,labels2);
+    saveErrors("riccati-eol.txt",eols,3*3*5,labels2);
 
     return EXIT_SUCCESS;
 }
