@@ -21,40 +21,14 @@ typedef Euler< Problem > EulerIntegrator; /* řešič */
 typedef RungeKutta< Problem > RKIntegrator; /* řešič */
 typedef Merson< Problem > MersonIntegrator; /* řešič */
 // interval ve kterem to chceme resit (a,b) =
-/* (a = */const double initialTime( 0.12 );/* , */
-const double finalTime( 0.15 );/* = b ) */
+/* (a = */const double initialTime( -9.0 );/* , */
+const double finalTime( -1.0 );/* = b ) */
 const double timeStep( 1.0e-3 ); // v techto casovych krocich ukladam do souboru pro vykresleni
 const double integrationTimeStep( 1.0e-3 ); // v techto casovych krocich to resim ... presnost;
 const double constParam( 1.0 );
 
-
-class Error{
-public:
-  Error(Problem &riccati, ODESolution &u,
-              const double& _initialTime,
-              const double& _finalTime,
-              const double& _timeStep,
-              const double& _constParam )
-              :problem(riccati),
-              solution(u),
-              initialTime(_initialTime),
-              finalTime(_finalTime),
-              timeStep(_timeStep),
-              constParam(_constParam),
-              timeStepsCount(std::ceil( std::max( 0.0, finalTime - initialTime ) / timeStep ))
-              {}
-
-  virtual double getError() = 0;
-
-protected:
-  Problem &problem;
-  ODESolution &solution;
-  const double initialTime;
-  const double finalTime;
-  const double timeStep;
-  const double constParam;
-  const int timeStepsCount;
-};
+// (a,b) = (-9.031,0.473)
+// predchozi (0.12,0.15)
 
 double error1l(
   Problem &problem,
@@ -107,10 +81,10 @@ double eol(double error1, double tau1, double error2, double tau2){
 }
 
 template<typename Integrator>
-void method(Problem &problem, ODESolution &solution, const double &integrationTimeStep){
+void method(Problem &problem, ODESolution &solution, const double &timeStep){
   Integrator integrator(problem);
 
-  integrator.setIntegrationTimeStep( integrationTimeStep );
+  integrator.setIntegrationTimeStep( timeStep );
   ODESolver< Problem, Integrator > solver( problem, integrator );
 
   double initialCondition[ 1 ];
@@ -177,6 +151,9 @@ int main( int argc, char** argv )
     solve(problem, solution, &error[27], 1.0e-3/8.0, "08/");
     solve(problem, solution, &error[36], 1.0e-3/16.0, "16/");
     solve(problem, solution, &error[45], 1.0e-3/32.0, "32/");
+
+    //problem.writeExactSolution("riccati-exact.txt", initialTime, finalTime,
+    //  1.0e-3/32.0, constParam);
 
     saveErrors("riccati-errors.txt",error,9*6);
 
